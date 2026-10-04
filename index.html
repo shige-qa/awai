@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="AWAI（あわい）。ホームページとAI動画をつくり、システムが動くかどうかまで確かめます。">
+<title>AWAI（あわい）｜ホームページとAI動画をつくり、動くかどうかまで確かめます</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Unbounded:wght@300;400&display=swap">
+<style>
+/* Layout: 夜の地に、光る大きな文字。細い格子と光る枠が、入口の映像（宇宙・デジタル異空間）とページをひと続きにする。 */
+:root {
+  color-scheme: dark;
+  --night: #04060D;       /* 地 */
+  --deep: #0A1020;        /* 一段上の面 */
+  --ice: #EAF0FF;         /* 本文 */
+  --mist: #B4C2E4;        /* 添え文字 */
+  --beam: #7FA8FF;        /* 光（線・小さな英字・フォーカス） */
+  --beam-hot: #5E8BFF;    /* 光の濃いところ */
+  --line: rgba(127, 168, 255, .26);
+  --line-soft: rgba(127, 168, 255, .12);
+  --glow: rgba(90, 140, 255, .42);
+
+  --f-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --f-en: "Unbounded", "Zen Kaku Gothic New", sans-serif;
+
+  --t-xs: .6875rem;
+  --t-s: .875rem;
+  --t-m: 1rem;
+  --t-l: 1.25rem;
+  --t-xl: clamp(1.5rem, 2.5vw, 1.75rem);
+  --t-2xl: clamp(2.2rem, 5.4vw, 4rem);
+  --t-hero: clamp(3.1rem, 10.6vw, 9.6rem);   /* 1行目4文字が必ず1行に収まる大きさ。2行目は1.32倍で幅をそろえる */
+
+  --gutter: clamp(20px, 4vw, 56px);
+  --band: clamp(76px, 10vw, 132px);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--night); color: var(--ice);
+  font-family: var(--f-body); font-size: var(--t-m); line-height: 1.95; letter-spacing: .04em;
+  line-break: strict; overflow-wrap: anywhere; -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+p, h1, h2, h3 { margin: 0; }
+h1, h2, h3 { text-wrap: balance; font-feature-settings: "palt"; }
+.ph { display: inline-block; }
+:focus-visible { outline: 2px solid var(--beam); outline-offset: 3px; }
+.en { font-family: var(--f-en); font-weight: 300; font-size: var(--t-xs); letter-spacing: .28em; text-transform: uppercase; color: var(--beam); }
+.wrap { max-width: 1280px; margin-inline: auto; padding-inline: var(--gutter); }
+.band { padding-block: var(--band); position: relative; }
+section[id] { scroll-margin-top: calc(60px + env(safe-area-inset-top, 0px)); }
+
+/* 見出し */
+.head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 28px; margin-bottom: clamp(32px, 5vw, 56px); }
+.head h2 { font-size: var(--t-2xl); font-weight: 900; line-height: 1.2; letter-spacing: .02em; }
+.head p { flex-basis: 100%; max-width: 36em; color: var(--mist); }
+
+/* 光る枠（マウスの位置に光が寄る） */
+.frame { position: relative; background: linear-gradient(180deg, rgba(127, 168, 255, .09), rgba(127, 168, 255, .02)); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.frame::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .3s; background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 0%), rgba(127, 168, 255, .22), transparent 65%); }
+.frame:hover::after { opacity: 1; }
+
+/* ---------- 上の帯 ---------- */
+.bar { position: fixed; inset: 0 0 auto 0; z-index: 20; padding-top: env(safe-area-inset-top, 0px); transition: background .3s; }
+.bar.is-solid { background: rgba(4, 6, 13, .78); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border-bottom: 1px solid var(--line-soft); }
+.bar-in { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 68px; }
+.name { font-weight: 700; font-size: 1.125rem; letter-spacing: .36em; text-decoration: none; }
+.nav { display: flex; align-items: center; gap: clamp(14px, 2.6vw, 38px); font-size: var(--t-s); }
+.nav a { text-decoration: none; opacity: .86; }
+.nav a:hover { opacity: 1; }
+.nav .only-wide { display: none; }
+@media (min-width: 760px) { .nav .only-wide { display: inline; } }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .6em;
+  padding: .75em 1.7em; border: 1px solid var(--beam); border-radius: 4px;
+  background: rgba(127, 168, 255, .06); color: var(--ice); font: inherit; font-size: var(--t-s); letter-spacing: .12em; line-height: 1.4;
+  text-decoration: none; cursor: pointer;
+  box-shadow: 0 0 22px var(--glow), inset 0 0 14px rgba(90, 140, 255, .22);
+  transition: background .25s, box-shadow .25s;
+}
+.btn:hover { background: rgba(127, 168, 255, .2); box-shadow: 0 0 34px rgba(90, 140, 255, .7), inset 0 0 18px rgba(90, 140, 255, .35); }
+.nav a.btn { opacity: 1; }
+
+/* ---------- 入口 ---------- */
+.hero { position: relative; isolation: isolate; min-height: clamp(600px, 88vh, 940px); display: grid; align-items: end; overflow: hidden; }
+.hero video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -3; filter: brightness(.86) contrast(1.04); }
+.hero::before { content: ""; position: absolute; inset: 0; z-index: -2;
+  background: linear-gradient(180deg, rgba(4, 6, 13, .62) 0%, rgba(4, 6, 13, .08) 26%, rgba(4, 6, 13, .5) 56%, var(--night) 94%),
+              linear-gradient(90deg, rgba(4, 6, 13, .72) 0%, rgba(4, 6, 13, 0) 62%); }
+.hero::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: linear-gradient(rgba(127, 168, 255, .11) 1px, transparent 1px), linear-gradient(90deg, rgba(127, 168, 255, .11) 1px, transparent 1px);
+  background-size: 96px 96px; -webkit-mask-image: linear-gradient(180deg, transparent 20%, #000 70%); mask-image: linear-gradient(180deg, transparent 20%, #000 70%); }
+.tick { position: absolute; width: 22px; height: 22px; border: 1px solid rgba(127, 168, 255, .75); top: calc(96px + env(safe-area-inset-top, 0px)); }
+.tick.l { left: var(--gutter); border-right: 0; border-bottom: 0; }
+.tick.r { right: var(--gutter); border-left: 0; border-bottom: 0; }
+.hero-in { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 22rem); align-items: end; gap: 28px 48px; padding-top: 140px; padding-bottom: clamp(30px, 5vw, 60px); width: 100%; }
+.kicker { display: flex; align-items: center; gap: 16px; margin-bottom: clamp(14px, 2.4vw, 26px); }
+.kicker::before { content: ""; flex: none; width: 56px; height: 1px; background: var(--beam); box-shadow: 0 0 10px var(--beam); }
+.hero h1 { width: fit-content; max-width: 100%; font-size: var(--t-hero); font-weight: 900; line-height: 1; letter-spacing: 0; }
+.hero h1 span { display: block; white-space: nowrap; animation: rise 1s cubic-bezier(.2, .7, .2, 1) both; }
+/* 1行目は線だけ（あいだ＝空いているところ）、2行目は光で満たす（立つ） */
+.hero h1 .hollow { color: rgba(4, 6, 13, .34); -webkit-text-stroke: clamp(1.4px, .17vw, 2.6px) #D6E4FF; letter-spacing: .02em; filter: drop-shadow(0 0 16px rgba(90, 140, 255, .85)); }
+.hero h1 .solid { font-size: 1.32em; line-height: 1.04; letter-spacing: -.01em; animation-delay: .14s;
+  background: linear-gradient(100deg, #fff 0%, #fff 30%, #A9C8FF 46%, var(--beam-hot) 56%, #fff 72%, #fff 100%); background-size: 240% 100%; background-position: 100% 0;
+  -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 42px rgba(90, 140, 255, .62)); }
+.hero h1 .solid { animation: rise 1s cubic-bezier(.2, .7, .2, 1) .14s both, shine 7s ease-in-out 1.4s infinite; }
+/* 2つの行のあいだを走る光 */
+.hero h1 .beam { display: block; height: 2px; margin-block: clamp(6px, 1vw, 14px) clamp(2px, .5vw, 8px); position: relative; overflow: hidden; background: rgba(127, 168, 255, .35); animation: none; }
+.hero h1 .beam::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 28%; background: linear-gradient(90deg, transparent, #fff, transparent); box-shadow: 0 0 14px #fff; animation: sweep 3.6s cubic-bezier(.4, 0, .2, 1) infinite; }
+@keyframes rise { from { opacity: .001; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@keyframes shine { 0%, 55% { background-position: 100% 0; } 100% { background-position: 0% 0; } }
+@keyframes sweep { from { transform: translateX(-110%); } to { transform: translateX(400%); } }
+.side { display: grid; gap: 12px; padding-bottom: .6rem; }
+.side p { color: #D3DDF6; font-size: 1.0625rem; }
+.hero-foot { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding-top: 16px; border-top: 1px solid var(--line-soft); font-size: var(--t-s); color: var(--mist); }
+.hero-foot button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: .6em; color: var(--ice); }
+.hero-foot button::before { content: ""; width: 9px; height: 11px; border-inline: 3px solid currentColor; }
+.hero-foot button[aria-pressed="true"]::before { width: 0; height: 0; border: 6px solid transparent; border-left: 10px solid currentColor; border-right: 0; }
+.hero-foot button:focus-visible { outline: 2px solid var(--beam); outline-offset: 4px; }
+@media (max-width: 1179px) { .hero-in { grid-template-columns: 1fr; } .side { max-width: 26rem; } }
+
+/* 流れる帯 */
+.run { overflow: hidden; border-block: 1px solid var(--line); background: var(--deep); }
+.run-in { display: flex; width: max-content; animation: run 38s linear infinite; }
+.run span { flex: none; padding: 18px 0; font-weight: 900; font-size: clamp(1.3rem, 3vw, 2.1rem); letter-spacing: .06em; white-space: nowrap; }
+.run i { font-style: normal; color: var(--beam); margin-inline: clamp(18px, 3vw, 40px); }
+@keyframes run { to { transform: translateX(-50%); } }
+
+/* ---------- できること ---------- */
+.cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 1059px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 599px) { .cards { grid-template-columns: 1fr; } }
+.card { display: grid; grid-template-rows: auto 1fr; }
+.card img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+.card .b { display: grid; gap: 12px; align-content: start; padding: 24px 22px 28px; min-width: 0; }
+.card h3 { font-size: clamp(1.25rem, 1.7vw, 1.5rem); font-weight: 700; line-height: 1.5; letter-spacing: .02em; }
+.card .first { font-weight: 700; }
+.card p { font-size: .9375rem; color: var(--mist); }
+.card p.first { color: var(--ice); }
+
+/* ---------- さわると動く ---------- */
+.move-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 639px) { .move-grid { grid-template-columns: 1fr; } }
+.tile { all: unset; display: block; position: relative; cursor: pointer; aspect-ratio: 16 / 9; max-width: 100%; overflow: hidden; background: var(--deep); border: 1px solid var(--line); border-radius: 6px; transition: box-shadow .3s, border-color .3s; }
+.tile video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.tile:hover, .tile.is-on { border-color: var(--beam); box-shadow: 0 0 34px var(--glow); }
+.tile .tag { position: absolute; left: 12px; bottom: 12px; display: flex; align-items: center; gap: .8em; padding: .5em 1em; border: 1px solid var(--line); border-radius: 4px; background: rgba(4, 6, 13, .74); font-size: var(--t-s); letter-spacing: .16em; }
+.tile .tag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--mist); }
+.tile.is-on .tag::before { background: var(--beam); box-shadow: 0 0 10px var(--beam); }
+.tile:focus-visible { outline: 2px solid var(--beam); outline-offset: 4px; }
+.note { margin-top: 20px; font-size: var(--t-s); color: var(--mist); }
+
+/* ---------- 一言 ---------- */
+.word-band { padding-block: clamp(84px, 12vw, 160px); border-block: 1px solid var(--line-soft); background:
+  radial-gradient(60% 120% at 12% 50%, rgba(90, 140, 255, .16), transparent 70%), var(--deep); }
+.word { font-weight: 900; font-size: var(--t-2xl); line-height: 1.5; letter-spacing: .03em; max-width: 20em; text-wrap: balance;
+  background: linear-gradient(100deg, #fff 30%, #A9C8FF 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* ---------- 進め方 ---------- */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); counter-reset: s; border-top: 1px solid var(--line); }
+.steps li { counter-increment: s; display: grid; gap: 8px; align-content: start; padding: 26px 18px 6px 0; position: relative; min-width: 0; }
+.steps li::before { content: counter(s, decimal-leading-zero); font-family: var(--f-en); font-weight: 300; font-size: 1.5rem; letter-spacing: .08em; color: var(--beam); font-variant-numeric: tabular-nums; }
+.steps li::after { content: ""; position: absolute; top: -4px; left: 0; width: 7px; height: 7px; border-radius: 50%; background: var(--beam); box-shadow: 0 0 12px var(--beam); }
+.steps b { font-weight: 700; font-size: var(--t-l); }
+.steps span { font-size: var(--t-s); color: var(--mist); line-height: 1.8; }
+@media (max-width: 859px) { .steps { grid-template-columns: 1fr; border-top: 0; border-left: 1px solid var(--line); } .steps li { grid-template-columns: 3.4rem 1fr; align-items: baseline; padding: 14px 0 14px 22px; } .steps li span { grid-column: 2; } .steps li::after { top: 26px; left: -4px; } }
+.way { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px clamp(24px, 5vw, 72px); margin-top: clamp(36px, 5vw, 56px); color: var(--mist); }
+@media (max-width: 719px) { .way { grid-template-columns: 1fr; } }
+.way p { max-width: 30em; }
+
+/* ---------- 実績 ---------- */
+.done { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(24px, 5vw, 72px); }
+@media (max-width: 719px) { .done { grid-template-columns: 1fr; } }
+.done div { display: grid; gap: 4px; padding-block: 22px; border-top: 1px solid var(--line); min-width: 0; }
+.done h3 { font-size: var(--t-l); font-weight: 700; letter-spacing: .04em; line-height: 1.6; }
+.done p { font-size: .9375rem; color: var(--mist); }
+
+/* ---------- AWAIについて ---------- */
+.about { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: clamp(32px, 6vw, 88px); align-items: start; }
+@media (max-width: 859px) { .about { grid-template-columns: 1fr; } }
+.about .text { display: grid; gap: 1.5em; max-width: 32em; color: #D3DDF6; }
+.about .text strong { font-weight: 900; font-size: var(--t-xl); letter-spacing: .06em; line-height: 1.7; color: var(--ice); }
+.who { display: grid; gap: 14px; padding: clamp(22px, 3vw, 32px); }
+.who h3 { font-size: var(--t-l); font-weight: 700; letter-spacing: .1em; }
+.who .kana { font-size: var(--t-s); color: var(--mist); letter-spacing: .14em; }
+.who > p { color: #D3DDF6; }
+.who ul { list-style: none; margin: 6px 0 0; padding: 14px 0 0; border-top: 1px solid var(--line); display: grid; gap: 8px; font-size: .9375rem; }
+.who li { display: grid; }
+.who li small { font-size: var(--t-s); color: var(--mist); }
+.who a { text-underline-offset: 4px; text-decoration-color: var(--beam); position: relative; z-index: 1; }
+
+/* ---------- 相談する ---------- */
+.ask { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(32px, 6vw, 88px); align-items: start; }
+@media (max-width: 859px) { .ask { grid-template-columns: 1fr; } }
+.ask .text { display: grid; gap: 1.2em; color: var(--mist); max-width: 28em; }
+.ask .text .big { font-weight: 900; font-size: var(--t-xl); line-height: 1.7; letter-spacing: .04em; color: var(--ice); }
+form { display: grid; gap: 18px; min-width: 0; }
+label { display: grid; gap: 6px; font-size: var(--t-s); letter-spacing: .12em; color: var(--mist); }
+input, textarea { width: 100%; padding: .85em 1em; font: inherit; font-size: 1rem; letter-spacing: .04em; color: var(--ice); background: var(--deep); border: 1px solid var(--line); border-radius: 4px; }
+input:focus-visible, textarea:focus-visible { outline: none; border-color: var(--beam); box-shadow: 0 0 22px var(--glow); }
+textarea { min-height: 9.5em; resize: vertical; }
+.send { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.send .btn { padding: .9em 2.6em; font-size: var(--t-m); }
+.send output { font-size: var(--t-s); color: var(--beam); }
+.proto { font-size: var(--t-s); color: var(--mist); }
+
+/* ---------- 足元 ---------- */
+.foot { border-top: 1px solid var(--line); padding-block: 28px calc(28px + env(safe-area-inset-bottom, 0px)); font-size: var(--t-s); color: var(--mist); }
+.foot .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .hero h1 span, .hero h1 .solid, .hero h1 .beam::after { animation: none; }
+  .run-in { animation: none; }
+}
+</style>
+</head>
+<body>
+<header class="bar" id="bar">
+  <div class="wrap bar-in">
+    <a class="name" href="#top">AWAI</a>
+    <nav class="nav" aria-label="ページ内の移動">
+      <a class="only-wide" href="#can">できること</a>
+      <a class="only-wide" href="#done">実績</a>
+      <a class="only-wide" href="#about">AWAIについて</a>
+      <a class="btn" href="#ask">相談する</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero" aria-label="はじめに">
+    <video id="heroVideo" src="assets/hero.mp4" poster="assets/hero.jpg" muted loop playsinline preload="metadata" aria-hidden="true"></video>
+    <i class="tick l" aria-hidden="true"></i><i class="tick r" aria-hidden="true"></i>
+    <div class="wrap hero-in">
+      <div>
+        <p class="kicker en">Fukuoka — Web / AI Film / QA / Payment</p>
+        <h1 aria-label="あいだに立つ。"><span class="hollow">あいだに</span><i class="beam" aria-hidden="true"></i><span class="solid">立つ。</span></h1>
+      </div>
+      <div class="side">
+        <span class="en">AWAI ／ 仁科裕成</span>
+        <p>ホームページとAI動画をつくり、システムが動くかどうかまで確かめます。</p>
+      </div>
+      <div class="hero-foot">
+        <span>この映像はAIで作っています。</span>
+        <button type="button" id="heroToggle" aria-pressed="false">映像を止める</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="run" aria-hidden="true">
+    <div class="run-in">
+      <span>ホームページ<i>✳</i>AI動画<i>✳</i>検証<i>✳</i>お会計<i>✳</i>ホームページ<i>✳</i>AI動画<i>✳</i>検証<i>✳</i>お会計<i>✳</i></span>
+      <span>ホームページ<i>✳</i>AI動画<i>✳</i>検証<i>✳</i>お会計<i>✳</i>ホームページ<i>✳</i>AI動画<i>✳</i>検証<i>✳</i>お会計<i>✳</i></span>
+    </div>
+  </div>
+
+  <section class="band" id="can">
+    <div class="wrap">
+      <div class="head"><h2>できること</h2><span class="en">What we do</span></div>
+      <div class="cards">
+        <article class="card frame">
+          <img src="assets/k1.jpg" alt="" loading="lazy">
+          <div class="b">
+            <span class="en">Web</span>
+            <h3><span class="ph">ホームページを</span><span class="ph">つくる</span></h3>
+            <p class="first">作って終わりではなく、渡して終わり。ドメインもサーバーも、あなたの名義で残します。</p>
+            <p>鍵ごとお渡しして、当方のアカウントは納品のときに消します。月々の支払いに縛るやり方はしません。</p>
+          </div>
+        </article>
+        <article class="card frame">
+          <img src="assets/k2.jpg" alt="" loading="lazy">
+          <div class="b">
+            <span class="en">AI Film</span>
+            <h3><span class="ph">AI動画を</span><span class="ph">つくる</span></h3>
+            <p class="first">絵を動かす。店の仕事を見せる。スマホで見られる縦の動画から、長いものまで。</p>
+            <p>作品の中をカメラが進む形で、作家さんの絵を映像にしてきました。お店の仕事も撮らずに作れます。</p>
+          </div>
+        </article>
+        <article class="card frame">
+          <img src="assets/k3.jpg" alt="" loading="lazy">
+          <div class="b">
+            <span class="en">QA</span>
+            <h3><span class="ph">動くかどうかを</span><span class="ph">確かめる</span></h3>
+            <p class="first">触って、壊れるところを見つけて、直し方まで書きます。</p>
+            <p>動かない場所、分かりにくい場所、日本語がおかしい場所を見つけて渡します。海外のソフトの日本語を直す仕事もしています。</p>
+          </div>
+        </article>
+        <article class="card frame">
+          <img src="assets/k4.jpg" alt="" loading="lazy">
+          <div class="b">
+            <span class="en">Payment</span>
+            <h3><span class="ph">お店のお会計を</span><span class="ph">変える</span></h3>
+            <p class="first">カードやスマホで払えるようにします。機械選びから導入、そのあとの使い方まで。</p>
+            <p>Square の申し込み、置いたあとの設定と使い方まで、通しで見ます。入れただけで終わらないように。</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="move" style="padding-top: 0">
+    <div class="wrap">
+      <div class="head">
+        <h2><span class="ph">止まった絵が、</span><span class="ph">動き出す。</span></h2><span class="en">Touch to play</span>
+        <p>写真や絵が一枚あれば、そこから映像にできます。下の四枚にさわってみてください。</p>
+      </div>
+      <div class="move-grid">
+        <button type="button" class="tile" aria-label="日本画の絵を動かす"><video src="assets/c1.mp4" poster="assets/c1.jpg" muted playsinline preload="none"></video><span class="tag">絵</span></button>
+        <button type="button" class="tile" aria-label="料理の写真を動かす"><video src="assets/c2.mp4" poster="assets/c2.jpg" muted playsinline preload="none"></video><span class="tag">料理</span></button>
+        <button type="button" class="tile" aria-label="器の写真を動かす"><video src="assets/c3.mp4" poster="assets/c3.jpg" muted playsinline preload="none"></video><span class="tag">商品</span></button>
+        <button type="button" class="tile" aria-label="宇宙の絵を動かす"><video src="assets/c4.mp4" poster="assets/c4.jpg" muted playsinline preload="none"></video><span class="tag">宇宙</span></button>
+      </div>
+      <p class="note">四枚とも、AIで作った見本です。実在の作品やお店ではありません。</p>
+    </div>
+  </section>
+
+  <section class="word-band">
+    <div class="wrap">
+      <p class="word"><span class="ph">火加減を読むのも、</span><span class="ph">画面の向こうを読むのも、</span><span class="ph">同じだと思っています。</span></p>
+    </div>
+  </section>
+
+  <section class="band" id="how">
+    <div class="wrap">
+      <div class="head"><h2>進め方</h2><span class="en">Process</span></div>
+      <ol class="steps">
+        <li><b>聞く</b><span>やりたいことを聞きます。文章でかまいません。</span></li>
+        <li><b>案を出す</b><span>見た目の案を1つ出します。</span></li>
+        <li><b>作る</b><span>直しながら作ります。</span></li>
+        <li><b>確かめる</b><span>できたものを確認してもらいます。</span></li>
+        <li><b>渡す</b><span>公開して、鍵ごとお渡しします。</span></li>
+      </ol>
+      <div class="way">
+        <p>会議はしません。メールとチャットで進めます。そのぶん、手を動かす時間に回します。遠くの方でも、同じように進みます。</p>
+        <p>費用は、やることが決まってからお伝えします。先にご相談ください。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="done" style="padding-top: 0">
+    <div class="wrap">
+      <div class="head"><h2>実績</h2><span class="en">Works</span></div>
+      <div class="done">
+        <div><h3>作家さんの公式サイト</h3><p>墨絵を描く作家さんのサイトをつくり、公開しています。</p></div>
+        <div><h3>絵を動かす動画</h3><p>龍の絵を、絵の中をカメラが進む映像にして納めました。</p></div>
+        <div><h3>自分で運用しているショート動画</h3><p>スマホ修理のアカウントで、1本4万回以上再生された動画があります。フォロワーは400人ほどです。</p></div>
+        <div><h3>海外のソフトの日本語検証</h3><p>世界中で使われているソフトの日本語を直し、開発チームに修正してもらいました。記録は公開されています。</p></div>
+        <div><h3>システムの検証（受託）</h3><p>会社から依頼を受けて、できあがったシステムを使う人の側から確かめています。</p></div>
+        <div><h3>AI動画の制作（販売）</h3><p>ご依頼を受けて動画をつくり、お納めしています。</p></div>
+        <div><h3>お会計の仕組みの導入</h3><p>Square を導入し、お店のお会計をカードやスマホに対応させています。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="about" style="padding-top: 0">
+    <div class="wrap">
+      <div class="head"><h2>AWAI（あわい）</h2><span class="en">About</span></div>
+      <div class="about">
+        <div class="text">
+          <p>古い言葉の「あはひ」から取りました。漢字では「間」と書きます。ものとものが接するところ、人と人の間柄、色のつりあい、その場の情勢。昔の人は、この四つをひとつの言葉で指していました。</p>
+          <p>この仕事も、同じところに立っています。作家と、その作品をまだ知らない人。依頼した人と、受け取る人。人と、AIという道具。</p>
+          <p>つくるのは、ホームページでも動画でもありません。橋です。橋は、渡る人のためにあります。渡る人が橋を意識しないなら、それは良い橋です。作家のサイトをつくるとき、目立つべきは作品であって、作り手ではありません。</p>
+          <strong><span class="ph">前に出ない。</span><span class="ph">けれど、そこに必ずある。</span></strong>
+        </div>
+        <aside class="who frame" aria-label="代表">
+          <div>
+            <h3>仁科 裕成</h3>
+            <p class="kana">にしな ひろしげ</p>
+          </div>
+          <p>岡山生まれ。東北、栃木、香川をへて、いま福岡。素潜りと、鮎の塩焼き。鮎は30匹を同時に焼きます。</p>
+          <ul>
+            <li><a href="https://www.instagram.com/hiroshige_12/">Instagram @hiroshige_12</a><small>本人</small></li>
+            <li><a href="https://www.instagram.com/kyushushurigumi/">Instagram @kyushushurigumi</a><small>スマホ修理の動画</small></li>
+            <li><a href="https://www.instagram.com/shiori_ai_kitchen/">Instagram @shiori_ai_kitchen</a><small>AIでつくる料理の動画</small></li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="ask" style="padding-top: 0">
+    <div class="wrap">
+      <div class="head"><h2>相談する</h2><span class="en">Contact</span></div>
+      <div class="ask">
+        <div class="text">
+          <p class="big"><span class="ph">何をどうしたいか、</span><span class="ph">まだ形になっていなくて</span><span class="ph">構いません。</span></p>
+          <p>仕事のご相談、見積り、「こんなことできますか」のご質問。どれでも構いません。何をしたいかだけ書いていただければ、こちらで整理します。</p>
+          <p>2営業日以内にお返事します。電話はしていません。メールとチャットで進めます。</p>
+        </div>
+        <form id="askForm" novalidate>
+          <label for="f-name">お名前<input id="f-name" name="name" type="text" autocomplete="name"></label>
+          <label for="f-contact">ご連絡先（メールなど）<input id="f-contact" name="contact" type="text" autocomplete="email"></label>
+          <label for="f-message">ご相談の内容<textarea id="f-message" name="message"></textarea></label>
+          <div class="send">
+            <button class="btn" type="submit">送信</button>
+            <output id="askOut" for="f-name f-contact f-message"></output>
+          </div>
+          <p class="proto">いまは確認用のページです。送信はまだ届きません。</p>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>AWAI　福岡</span>
+    <span>このページの映像と見本の画像は、AIで作っています。</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // 上の帯：入口を過ぎたら地を敷く
+  var bar = document.getElementById('bar');
+  function onScroll() { bar.classList.toggle('is-solid', window.scrollY > 40); }
+  window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  // 入口の映像
+  var hv = document.getElementById('heroVideo'), ht = document.getElementById('heroToggle');
+  function label() { var stopped = hv.paused; ht.setAttribute('aria-pressed', stopped ? 'true' : 'false'); ht.textContent = stopped ? '映像を動かす' : '映像を止める'; }
+  function tryPlay(v) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+  hv.addEventListener('play', label); hv.addEventListener('pause', label);
+  ht.addEventListener('click', function () { if (hv.paused) tryPlay(hv); else hv.pause(); });
+  if (!calm) tryPlay(hv);
+  label();
+
+  // 光る枠：マウスの位置へ光を寄せる
+  Array.prototype.forEach.call(document.querySelectorAll('.frame'), function (el) {
+    el.addEventListener('pointermove', function (e) {
+      var r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  });
+
+  // さわると動く四枚
+  Array.prototype.forEach.call(document.querySelectorAll('.tile'), function (tile) {
+    var v = tile.querySelector('video');
+    function on() { tile.classList.add('is-on'); tryPlay(v); }
+    function off() { tile.classList.remove('is-on'); v.pause(); try { v.currentTime = 0; } catch (e) {} }
+    tile.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') on(); });
+    tile.addEventListener('pointerleave', function (e) { if (e.pointerType === 'mouse') off(); });
+    tile.addEventListener('click', function () { if (v.paused) on(); else off(); });
+    v.addEventListener('ended', off);
+  });
+
+  // 相談：確認用のあいだは送らない
+  var form = document.getElementById('askForm'), out = document.getElementById('askOut');
+  form.addEventListener('submit', function (e) { e.preventDefault(); out.textContent = '確認用のページのため、送信していません。'; });
+})();
+</script>
+</body>
+</html>
