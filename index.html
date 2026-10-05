@@ -397,7 +397,7 @@ textarea { min-height: 9.5em; resize: vertical; }
             <button class="btn" type="submit">送信</button>
             <output id="askOut" for="f-name f-contact f-message"></output>
           </div>
-          <p class="proto">いまは確認用のページです。送信はまだ届きません。</p>
+          <p class="proto">ご連絡先とご相談の内容は必ずご記入ください。</p>
         </form>
       </div>
     </div>
@@ -449,9 +449,27 @@ textarea { min-height: 9.5em; resize: vertical; }
     v.addEventListener('ended', off);
   });
 
-  // 相談：確認用のあいだは送らない
+  // 相談：Googleフォームへ送る（届いたかどうかの返事は読めないので、通信の失敗だけを拾う）
   var form = document.getElementById('askForm'), out = document.getElementById('askOut');
-  form.addEventListener('submit', function (e) { e.preventDefault(); out.textContent = '確認用のページのため、送信していません。'; });
+  var ASK_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSe6hdDnxVTnt11Uz4XtVbgmRseelUDBug4ybeYiOck2uHIVMA/formResponse';
+  var ASK_FIELDS = { name: 'entry.1580168219', contact: 'entry.920086935', message: 'entry.194383550' };
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = form.querySelector('button[type="submit"]');
+    var contact = form.elements.contact.value.trim(), message = form.elements.message.value.trim();
+    if (!contact) { out.textContent = 'ご連絡先をご記入ください。'; form.elements.contact.focus(); return; }
+    if (!message) { out.textContent = 'ご相談の内容をご記入ください。'; form.elements.message.focus(); return; }
+    var body = new URLSearchParams();
+    body.append(ASK_FIELDS.name, form.elements.name.value.trim());
+    body.append(ASK_FIELDS.contact, contact);
+    body.append(ASK_FIELDS.message, message);
+    btn.disabled = true; out.textContent = '送信しています…';
+    fetch(ASK_URL, { method: 'POST', mode: 'no-cors', body: body }).then(function () {
+      form.reset(); out.textContent = '送信しました。2営業日以内にお返事します。';
+    }).catch(function () {
+      out.textContent = '送信できませんでした。通信の状態を確かめて、もう一度お試しください。';
+    }).then(function () { btn.disabled = false; });
+  });
 })();
 </script>
 </body>
